@@ -386,12 +386,18 @@ class EventEmitterTest extends TestCase
         self::assertTrue($bCalled);
     }
 
-    public function testEventNameMustBeStringOn()
+    public function testGeneralListener()
     {
-        self::expectException(InvalidArgumentException::class);
-        self::expectExceptionMessage('event name must not be null');
-
-        $this->emitter->on(null, function () {});
+        $aCalled = 0;
+        $aCallable = function () use (&$aCalled) {
+            $aCalled++;
+        };
+        $this->emitter->on(null, $aCallable);
+        self::assertSame($aCalled, 0);
+        $this->emitter->emit('event1');
+        self::assertSame($aCalled, 1);
+        $this->emitter->emit('event2');
+        self::assertSame($aCalled, 2);
     }
 
     public function testEventNameMustBeStringOnce()

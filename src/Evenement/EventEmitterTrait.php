@@ -16,14 +16,16 @@ use InvalidArgumentException;
 trait EventEmitterTrait
 {
     protected $listeners = [];
+    protected $generalListeners = [];
     protected $beforeOnceListeners = [];
     protected $onceListeners = [];
     protected $children = [];
 
     public function on($event, callable $listener)
     {
-        if ($event === null) {
-            throw new InvalidArgumentException('event name must not be null');
+        if ($event === null || $event === '*') {
+            $this->generalListeners[] = $listener;
+            return $this;
         }
 
         if (!isset($this->listeners[$event])) {
@@ -182,6 +184,10 @@ trait EventEmitterTrait
             foreach ($listeners as $listener) {
                 $listener(...$arguments);
             }
+        }
+
+        foreach ($this->generalListeners as $listener) {
+            $listener(...$arguments);
         }
 
         foreach ($this->children as $child) {
